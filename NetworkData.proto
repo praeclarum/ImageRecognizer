@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option csharp_namespace = "NetworkData";
+
+message Network
+{
+    map<string, DataSource> dataSources = 10;
+}
+
+message DataSource
+{
+    oneof kind {
+        ConvolutionDataSource convolution = 10;
+    }
+}
+
+message ConvolutionDataSource
+{
+    OptimizableVector weights = 10;
+    OptimizableVector biases = 20;
+}
+
+message OptimizableVector
+{
+    Vector value = 10;
+    Vector momentum = 20;
+    Vector velocity = 30;
+}
+
+message Vector
+{
+    repeated float values = 10 [packed=true];
+}
