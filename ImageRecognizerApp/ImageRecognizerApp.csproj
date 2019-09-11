@@ -85,7 +85,7 @@
         <Reference Include="System.Numerics.Vectors" />
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="Xamarin.Essentials" Version="1.1.0" />
+      <PackageReference Include="Xamarin.Essentials" Version="1.3.0" />
       <PackageReference Include="EasyLayout">
         <Version>0.2.4</Version>
       </PackageReference>

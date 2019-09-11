@@ -45,13 +45,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DataSource.cs" />
+    <Compile Include="ConvolutionWeights.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="RecognizerNetwork.cs" />
     <Compile Include="Network.cs" />
     <Compile Include="NetworkData.cs" />
     <Compile Include="MnistDataSet.cs" />
     <Compile Include="MPSExtensions.cs" />
+    <Compile Include="ImageConversion.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Google.Protobuf">

@@ -8,7 +8,12 @@ using System.Collections.Generic;
 
 namespace ImageRecognizerLibrary
 {
-    public class MnistDataSet
+    public interface IDataSet
+    {
+        (NSArray<MPSImage> Inputs, NSArray<MPSState> Losses) GetRandomBatch (IMTLDevice device, int batchSize);
+    }
+
+    public class MnistDataSet : IDataSet
     {
         readonly int numImages;
         readonly byte[] imagesData;
@@ -36,7 +41,7 @@ namespace ImageRecognizerLibrary
             return memoryStream.ToArray ();
         }
 
-        public (NSArray<MPSImage> Sources, NSArray<MPSState> Targets) GetRandomBatch (IMTLDevice device, int batchSize)
+        public (NSArray<MPSImage> Inputs, NSArray<MPSState> Losses) GetRandomBatch (IMTLDevice device, int batchSize)
         {
             var trainImageDesc = MPSImageDescriptor.GetImageDescriptor (
                 MPSImageFeatureChannelFormat.Unorm8,

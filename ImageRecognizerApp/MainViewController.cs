@@ -76,8 +76,7 @@ namespace ImageRecognizerApp
                 // Create the network
                 //
                 var network = new RecognizerNetwork ();
-                network.ShowedImage += Network_ShowImage;
-                network.ShowedOutputImage += Network_ShowOutputImage;
+                network.ImagesShown += Network_ImagesShown;
                 Console.WriteLine (network);
 
                 //
@@ -88,10 +87,15 @@ namespace ImageRecognizerApp
                 }
 
                 //
+                // Load the data set
+                //
+                var dataSet = new MnistDataSet (seed: 42);
+
+                //
                 // Train the network
                 //
                 if (needsTrain)
-                    await network.TrainAsync ();
+                    await network.TrainAsync (dataSet);
 
                 //
                 // Save the network if training went well
@@ -103,7 +107,7 @@ namespace ImageRecognizerApp
                     //
                     // Start predicting
                     //
-                    await network.PredictAsync ();
+                    await network.PredictAsync (dataSet);
                 }
                 else {
                     Console.WriteLine ("Bad weights");
@@ -112,25 +116,18 @@ namespace ImageRecognizerApp
                 //
                 // All done
                 //
-                network.ShowedImage -= Network_ShowImage;
-                network.ShowedOutputImage -= Network_ShowOutputImage;
+                network.ImagesShown -= Network_ImagesShown;
             }
             catch (Exception ex) {
                 Console.WriteLine (ex);
             }
         }
 
-        void Network_ShowImage (UIImage image)
+        void Network_ImagesShown ((UIImage InputImage, UIImage OutputImage) images)
         {
             BeginInvokeOnMainThread (() => {
-                imageView.Image = image;
-            });
-        }
-
-        void Network_ShowOutputImage (UIImage image)
-        {
-            BeginInvokeOnMainThread (() => {
-                imageOutputView.Image = image;
+                imageView.Image = images.InputImage;
+                imageOutputView.Image = images.OutputImage;
             });
         }
     }

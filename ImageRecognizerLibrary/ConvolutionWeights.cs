@@ -22,7 +22,7 @@ namespace ImageRecognizerLibrary
         bool WeightsAreValid ();
     }
 
-    public class Conv2dWeights : MPSCnnConvolutionDataSource, IWeights
+    public class ConvolutionWeights : MPSCnnConvolutionDataSource, IWeights
     {
         readonly string label;
         readonly bool bias;
@@ -31,13 +31,12 @@ namespace ImageRecognizerLibrary
         nuint updateCount;
         readonly MPSNNOptimizerAdam updater;
 
-        readonly OptimizerVectors weightVectors;
-        readonly OptimizerVectors biasVectors;
-        MPSCnnConvolutionWeightsAndBiasesState convWtsAndBias;
+        readonly OptimizableVector weightVectors;
+        readonly OptimizableVector biasVectors;
+        readonly MPSCnnConvolutionWeightsAndBiasesState convWtsAndBias;
         readonly NSArray<MPSVector> momentumVectors;
         readonly NSArray<MPSVector> velocityVectors;
 
-        //bool isLoaded = false;
         bool isDisposed = false;
 
         public override string Label => label;
@@ -54,7 +53,7 @@ namespace ImageRecognizerLibrary
 
         readonly ExecutionOptions options;
 
-        public Conv2dWeights (CompileOptions options, int inChannels, int outChannels, int kernelSize, int stride, bool bias, string label, int seed)
+        public ConvolutionWeights (CompileOptions options, int inChannels, int outChannels, int kernelSize, int stride, bool bias, string label, int seed)
         {
             this.options = options.ExecutionOptions;
 
@@ -70,10 +69,10 @@ namespace ImageRecognizerLibrary
             var lenWeights = inChannels * kernelSize * kernelSize * outChannels;
 
             var vDescWeights = VectorDescriptor (lenWeights);
-            weightVectors = new OptimizerVectors (options.Device, vDescWeights, 0.0f);
+            weightVectors = new OptimizableVector (options.Device, vDescWeights, 0.0f);
 
             var vDescBiases = VectorDescriptor (outChannels);
-            biasVectors = new OptimizerVectors (options.Device, vDescBiases, 0.1f);
+            biasVectors = new OptimizableVector (options.Device, vDescBiases, 0.1f);
 
             RandomizeWeights ((nuint)seed);
 
@@ -189,7 +188,7 @@ namespace ImageRecognizerLibrary
         }
     }
 
-    class OptimizerVectors
+    class OptimizableVector
     {
         public readonly int VectorLength;
         public readonly int VectorByteSize;
@@ -199,10 +198,10 @@ namespace ImageRecognizerLibrary
         public readonly MPSVector Velocity;
         public readonly IntPtr ValuePointer;
 
-        public OptimizerVectors (IMTLDevice device, MPSVectorDescriptor descriptor, float initialValue)
+        public OptimizableVector (IMTLDevice device, MPSVectorDescriptor descriptor, float initialValue)
         {
             VectorLength = (int)descriptor.Length;
-            VectorByteSize = descriptor.ByteSize ();
+            VectorByteSize = descriptor.GetByteSize ();
             VectorDescriptor = descriptor;
             Value = Vector (device, descriptor, initialValue);
             Momentum = Vector (device, descriptor, 0.0f);

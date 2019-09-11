@@ -21,8 +21,6 @@ namespace ImageRecognizerLibrary
         readonly MPSNNFilterNode[] lossExitPoints;
         readonly MPSNNGraph trainingGraph;
 
-        static readonly MnistDataSet dataSet = new MnistDataSet (42);
-
         public RecognizerNetwork ()
         {
             trainingNodesTail = CreateTrainingNodes ();
@@ -94,20 +92,17 @@ namespace ImageRecognizerLibrary
             }
         }
 
-        protected override async Task PredictBatchesAsync ()
+        protected override async Task PredictBatchesAsync (IDataSet dataSet)
         {
             for (; ; ) {
-                await PredictBatchAsync ().ConfigureAwait (false);
+                await PredictBatchAsync (dataSet).ConfigureAwait (false);
                 await Task.Delay (1000);
             }
         }
 
-        Task PredictBatchAsync ()
-        {
-            return Task.Run (PredictBatch);
-        }
+        Task PredictBatchAsync (IDataSet dataSet) => Task.Run (() => PredictBatch (dataSet));
 
-        void PredictBatch ()
+        void PredictBatch (IDataSet dataSet)
         {
             var (inputs, losses) = dataSet.GetRandomBatch (device, BatchSize);
 
@@ -125,27 +120,26 @@ namespace ImageRecognizerLibrary
             commandBuffer.Commit ();
             commandBuffer.WaitUntilCompleted ();
 
-            ShowImage (inputs[0]);
-            ShowOutputImage (outputBatch[0]);
+            ShowImages (inputs[0], outputBatch[0]);
         }
 
-        protected override async Task TrainBatchesAsync ()
+        protected override async Task TrainBatchesAsync (IDataSet dataSet)
         {
             DumpWeights ();
 
             for (var i = 0; i < NumTrainingIterations; i++) {
                 Console.WriteLine ($"Training Batch {i}/{NumTrainingIterations} ({BatchSize} images each)");
-                await Task.Run (TrainBatch).ConfigureAwait (false);
+                await Task.Run (() => TrainBatch (dataSet)).ConfigureAwait (false);
 
                 //Console.WriteLine ($"Done training: {outputImages.Count} Outputs");
                 inferenceGraph.ReloadFromDataSources ();
-                await PredictBatchAsync ();
+                await PredictBatchAsync (dataSet);
             }
 
             DumpWeights ();
         }
 
-        void TrainBatch ()
+        void TrainBatch (IDataSet dataSet)
         {
             var (inputs, losses) = dataSet.GetRandomBatch (device, BatchSize);
 
