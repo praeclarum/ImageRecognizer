@@ -45,12 +45,7 @@ namespace ImageRecognizerLibrary
                 throw new InvalidOperationException ("No Metal Devices");
             Console.WriteLine ($"Device: {device.Name}");
 
-            var queue = device.CreateCommandQueue ();
-
-            Console.WriteLine ($"Queue: {queue}");
-            Console.WriteLine ($"Queue.Label: {queue.Label}");
-
-            compileOptions = new CompileOptions (new ExecutionOptions (device, queue));
+            compileOptions = new CompileOptions (new ExecutionOptions (device));
 
             textureLoader = new MTKTextureLoader (device);
         }
@@ -172,6 +167,14 @@ namespace ImageRecognizerLibrary
         {
             Device = device;
             Queue = queue;
+        }
+
+        public ExecutionOptions (IMTLDevice device)
+        {
+            Device = device;
+            Queue = device.CreateCommandQueue ();
+            Console.WriteLine ($"Queue: {Queue}");
+            Console.WriteLine ($"Queue.Label: {Queue.Label}");
         }
     }
 
